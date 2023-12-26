@@ -1,0 +1,26 @@
+# fly.toml app configuration file generated for lfc-muddy-shadow-6005 on 2023-12-27T00:07:25+05:30
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "lfc-muddy-shadow-6005"
+primary_region = "sin"
+
+[build]
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256
+
+[mounts]
+  destination = "/pb/pb_data"
+  source = "pb_data"
