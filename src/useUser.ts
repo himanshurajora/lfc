@@ -6,7 +6,7 @@ import { AuthModel } from 'pocketbase';
 // NOTE: optimally move this into a separate file
 
 export const useUser = () => {
-  const { user, setUser } = useContext(AuthContext);
+  const { user, setUser, loading, setLoading } = useContext(AuthContext);
   const { setItem } = useLocalStorage();
 
   const addUser = (user: AuthModel) => {
@@ -19,5 +19,5 @@ export const useUser = () => {
     setItem('user', '');
   };
 
-  return { user, addUser, removeUser, setUser };
+  return { user, addUser, removeUser, setUser, loading, setLoading };
 };
