@@ -1,5 +1,6 @@
 import './App.css';
 import { AuthContext } from './AuthContext';
+import { Dashboard } from './Dashboard';
 import Navbar from './Navbar';
 import { useUserState } from './useUserState';
 
@@ -10,6 +11,7 @@ function App() {
     <>
       <AuthContext.Provider value={{ user, setUser, loading, setLoading }}>
         <Navbar></Navbar>
+        <Dashboard></Dashboard>
       </AuthContext.Provider>
     </>
   );
