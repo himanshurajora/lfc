@@ -20,7 +20,7 @@ export default function Navbar() {
   };
 
   return (
-    <div className="font-bold min-w-full flex shadow-md border-red-300 justify-between px-3 py-2">
+    <div className="font-bold min-w-full flex shadow-md z-20 border-red-300 justify-between px-3 py-2">
       <span className="text-xl p-2">LFC</span>
       {renderLoginUI()}
     </div>
