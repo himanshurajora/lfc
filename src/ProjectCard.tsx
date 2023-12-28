@@ -25,11 +25,16 @@ export const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
         <a
           className="p-button p-button-secondary"
           href={project.github_repository}
+          target="_blank"
         >
           GitHub
         </a>
         {project.home_page && (
-          <a className="p-button p-button-info" href={project.home_page}>
+          <a
+            className="p-button p-button-info"
+            href={project.home_page}
+            target="_blank"
+          >
             Website
           </a>
         )}

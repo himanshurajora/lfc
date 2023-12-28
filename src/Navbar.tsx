@@ -21,7 +21,8 @@ export default function Navbar() {
 
   return (
     <div className="font-bold min-w-full flex shadow-md z-20 border-red-300 justify-between px-3 py-2">
-      <span className="text-xl p-2">LFC</span>
+      <img src="/logo.png" width={50} height="auto" alt="LFC's logo" />
+      <span className="text-xl p-2">Looking For Contributors</span>
       {renderLoginUI()}
     </div>
   );

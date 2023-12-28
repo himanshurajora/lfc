@@ -46,9 +46,9 @@ export const Dashboard: FC = () => {
     <div className="min-w-full mt-2 flex justify-center z-10">
       <div className="w-1/5 min-h-screen bg-slate-100 rounded-r-lg py-3 px-2">
         <div className="flex flex-col gap-1 bg-slate-200 px-1 py-2">
-          <b className="ml-5">Skill Level:</b>
+          <b className="ml-4">Skill Level:</b>
           <Slider
-            className="mt-2 mr-6"
+            className="mt-2 mx-6"
             range
             step={10}
             value={filters.skill_level_range}
