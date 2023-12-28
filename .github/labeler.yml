@@ -1,0 +1,35 @@
+Examples:
+  - any: ['examples/**']
+
+Library:
+  - all: ['lib/**']
+
+ReadMe:
+  - all: ['readme.md']
+
+CodeEditor:
+  - all: ['.vscode/**']
+
+Tests:
+  - any: ['test/**', '**/*.test.ts', '**/*.test.js, *.spec.ts']
+
+Core:
+  - all: ['src/**']
+
+CoreWithTests:
+  - all: ['lib/core/**', 'test/**']
+
+Actions:
+  - all: ['.github/**']
+
+Docs:
+  - all: ['Docs/**']
+
+Types:
+  - all: ['lib/types/**']
+
+Packages:
+  - all: ['**/**/package*.json']
+
+Codeowners:
+  - all: ['.github/CODEOWNERS']
