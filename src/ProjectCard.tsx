@@ -6,6 +6,7 @@ import { FC } from 'react';
 import { ProjectsResponse, UsersResponse } from './db.types';
 import { getGithubProfileUrl } from './utils';
 import _ from 'lodash';
+import moment from 'moment';
 
 export interface ProjectCardProps {
   project: ProjectsResponse<{ author: UsersResponse }>;
@@ -15,10 +16,14 @@ export interface ProjectCardProps {
 export const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
   return (
     <Panel header={project.name}>
-      <Chip
-        label={project.expand?.author.username}
-        image={getGithubProfileUrl(project.expand?.author.username)}
-      />
+      <div className="w-full flex flex-wrap gap-2">
+        <Chip
+          label={project.expand?.author.username}
+          image={getGithubProfileUrl(project.expand?.author.username)}
+        />
+        <Chip label={moment(project.created).fromNow()} />
+        <Chip label={moment(project.created).format('lll')} />
+      </div>
       <p className="m-0">{project.description}</p>
       <Divider />
       <div className="flex flex-row gap-3">
@@ -46,7 +51,7 @@ export const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
       </div>
       <ProgressBar
         className="mt-2"
-        value={50}
+        value={project.skill_level * 10}
         aria-labelledby="skill_label"
       ></ProgressBar>
       <div className="flex flex-row mt-3 items-center gap-3">
