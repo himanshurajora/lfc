@@ -24,7 +24,7 @@ export const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
         <Chip label={moment(project.created).fromNow()} />
         <Chip label={moment(project.created).format('lll')} />
       </div>
-      <p className="m-0">{project.description}</p>
+      <p className="mt-2 mx-2">{project.description}</p>
       <Divider />
       <div className="flex flex-row gap-3">
         <a

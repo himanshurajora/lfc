@@ -1,20 +1,55 @@
-import { useState } from 'react';
+import 'primeicons/primeicons.css';
 import './App.css';
 import { AuthContext } from './AuthContext';
 import { Dashboard } from './Dashboard';
 import { Navbar } from './Navbar';
+import { StoreContext } from './StoreContext';
+import { useProjects } from './useProjects';
 import { useUserState } from './useUserState';
-import 'primeicons/primeicons.css';
 
 function App() {
-  const { user, setUser, loading, setLoading } = useUserState();
-  const [globalSearch, setGlobalSearch] = useState('');
+  const {
+    user,
+    setUser,
+    loading: userLoading,
+    setLoading: setUserLoading,
+  } = useUserState();
+  const {
+    loading: projectsLoading,
+    projects,
+    setProjects,
+    setLoading: setProjectsLoading,
+    filters,
+    setFilters,
+    globalSearch,
+    setGlobalSearch,
+  } = useProjects();
 
   return (
     <>
-      <AuthContext.Provider value={{ user, setUser, loading, setLoading }}>
-        <Navbar setGlobalSearch={setGlobalSearch}></Navbar>
-        <Dashboard globalSearch={globalSearch}></Dashboard>
+      <AuthContext.Provider
+        value={{
+          user,
+          setUser,
+          loading: userLoading,
+          setLoading: setUserLoading,
+        }}
+      >
+        <StoreContext.Provider
+          value={{
+            filters,
+            loading: projectsLoading,
+            projects,
+            setProjects,
+            setFilters,
+            setLoading: setProjectsLoading,
+            globalSearch,
+            setGlobalSearch,
+          }}
+        >
+          <Navbar></Navbar>
+          <Dashboard></Dashboard>
+        </StoreContext.Provider>
       </AuthContext.Provider>
     </>
   );

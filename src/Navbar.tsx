@@ -1,12 +1,12 @@
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
+import { FC, useContext } from 'react';
+import { StoreContext } from './StoreContext';
 import { useAuth } from './useAuth';
-import { Dispatch, FC, SetStateAction } from 'react';
-export interface NavbarProps {
-  setGlobalSearch: Dispatch<SetStateAction<string>>;
-}
-export const Navbar: FC<NavbarProps> = ({ setGlobalSearch }) => {
+export interface NavbarProps {}
+export const Navbar: FC<NavbarProps> = () => {
   const { login, logout, user, loading } = useAuth();
+  const { setGlobalSearch } = useContext(StoreContext);
 
   const renderLoginUI = () => {
     if (loading) return <Button loading={loading}></Button>;
