@@ -1,4 +1,5 @@
 import { Card } from 'primereact/card';
+import { Divider } from 'primereact/divider';
 import { Image } from 'primereact/image';
 
 export const RightSidebar = () => {
@@ -21,6 +22,10 @@ export const RightSidebar = () => {
               preview
             />
           </div>
+          <Divider />
+          <a className="break-words" href="mailto:contact@himanshujangid.com">
+            contact@himanshujangid.com
+          </a>
         </Card>
       </div>
     </div>

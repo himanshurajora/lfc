@@ -7,6 +7,8 @@ import { ProjectsResponse, UsersResponse } from './db.types';
 import { getGithubProfileUrl } from './utils';
 import _ from 'lodash';
 import moment from 'moment';
+import { Button } from 'primereact/button';
+import { client } from './db';
 
 export interface ProjectCardProps {
   project: ProjectsResponse<{ author: UsersResponse }>;
@@ -15,7 +17,7 @@ export interface ProjectCardProps {
 
 export const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
   return (
-    <Panel header={project.name}>
+    <Panel header={project.name} toggleable>
       <div className="w-full flex flex-wrap gap-2">
         <Chip
           label={project.expand?.author.username}
@@ -24,7 +26,10 @@ export const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
         <Chip label={moment(project.created).fromNow()} />
         <Chip label={moment(project.created).format('lll')} />
       </div>
-      <p className="mt-2 mx-2">{project.description}</p>
+      <div
+        className="mt-2 mx-2"
+        dangerouslySetInnerHTML={{ __html: project.description }}
+      ></div>
       <Divider />
       <div className="flex flex-row gap-3">
         <a
@@ -60,6 +65,15 @@ export const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
           return <Chip className="bg-slate-300" key={index} label={language} />;
         })}
       </div>
+      {client.authStore.model &&
+        client.authStore.model.id === project.author && (
+          <>
+            <Divider />
+            <div className="flex justify-end">
+              <Button severity="danger">Delete</Button>
+            </div>
+          </>
+        )}
     </Panel>
   );
 };

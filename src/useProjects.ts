@@ -1,9 +1,14 @@
-import { useEffect, useState } from 'react';
-import { FILTER_INITIAL_VALUE, OrderByOptions } from './constants';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  FILTER_INITIAL_VALUE,
+  FilterByOptions,
+  OrderByOptions,
+} from './constants';
 import { Collections, ProjectsResponse, UsersResponse } from './db.types';
 import { FilterOptions } from './types';
 import _ from 'lodash';
 import { client } from './db';
+import { AddProjectDto } from './validation/addProjectValidation';
 
 export const useProjects = () => {
   const [filters, setFilters] = useState<FilterOptions>(FILTER_INITIAL_VALUE);
@@ -13,7 +18,7 @@ export const useProjects = () => {
     ProjectsResponse<{ author: UsersResponse }>[] | null
   >(null);
 
-  useEffect(() => {
+  const fetch = useCallback(async () => {
     setProjects(null);
     let raw_filter = `skill_level >= ${
       filters.skill_level_range[0] / 10
@@ -28,8 +33,22 @@ export const useProjects = () => {
       )})`;
     }
 
+    if (filters.filterOption === FilterByOptions.MINE) {
+      if (client.authStore.model)
+        raw_filter += `&& author.id = '${client.authStore.model.id}'`;
+    }
+
+    if (filters.filterOption === FilterByOptions.OTHERS) {
+      if (client.authStore.model)
+        raw_filter += `&& author.id != '${client.authStore.model.id}'`;
+    }
+
     if (globalSearch) {
-      raw_filter += `&& (name ~ '%${globalSearch}%' || description ~ '%${globalSearch}%' || languages ~ '%${globalSearch}%' || author.username ~ '%${globalSearch}%' || author.name ~ '%${globalSearch}%')`;
+      raw_filter += `&& (name ~ '%${globalSearch}%'
+      || description ~ '%${globalSearch}%' 
+      || languages ~ '%${globalSearch}%' 
+      || author.username ~ '%${globalSearch}%' 
+      || author.name ~ '%${globalSearch}%')`;
     }
 
     let sortBy = '';
@@ -59,6 +78,16 @@ export const useProjects = () => {
       });
   }, [filters, globalSearch]);
 
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
+
+  const addProject = async (project: AddProjectDto) => {
+    if (client.authStore.model)
+      return client
+        .collection('projects')
+        .create({ ...project, author: client.authStore.model.id });
+  };
   const [loading, setLoading] = useState(false);
 
   return {
@@ -70,5 +99,6 @@ export const useProjects = () => {
     setFilters,
     globalSearch,
     setGlobalSearch,
+    addProject,
   };
 };

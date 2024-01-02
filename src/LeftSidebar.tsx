@@ -4,7 +4,11 @@ import _ from 'lodash';
 import { CheckboxChangeEvent, Checkbox } from 'primereact/checkbox';
 import { RadioButtonChangeEvent, RadioButton } from 'primereact/radiobutton';
 import { SliderChangeEvent, Slider } from 'primereact/slider';
-import { supportedLanguages, OrderByOptions } from './constants';
+import {
+  supportedLanguages,
+  OrderByOptions,
+  FilterByOptions,
+} from './constants';
 
 export const LeftSidebar = () => {
   const { filters, setFilters } = useContext(StoreContext);
@@ -36,6 +40,11 @@ export const LeftSidebar = () => {
   const handleSortOptionSelection = (event: RadioButtonChangeEvent) => {
     setFilters({ ...filters, sortOption: event.value });
   };
+
+  const handleFilterOptionSelection = (event: RadioButtonChangeEvent) => {
+    setFilters({ ...filters, filterOption: event.value });
+  };
+
   return (
     <div className="w-1/5 min-h-[90vh] max-h-[90vh] bg-slate-100 rounded-r-lg py-3 px-2 flex flex-col gap-5">
       <div className="flex flex-col gap-1 bg-slate-200 px-1 py-2">
@@ -89,6 +98,29 @@ export const LeftSidebar = () => {
                   value={option}
                   onChange={handleSortOptionSelection}
                   checked={option === filters.sortOption}
+                />
+                <label htmlFor="ingredient1" className="ml-2">
+                  {_.startCase(option)}
+                </label>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="flex flex-col gap-3 px-5">
+        <div>
+          <b>Filter By:</b>
+        </div>
+        <div className="flex flex-wrap justify-content-center gap-3">
+          {_.map(FilterByOptions, (option) => {
+            return (
+              <div className="flex align-items-center" key={option}>
+                <RadioButton
+                  inputId={option}
+                  name={option}
+                  value={option}
+                  onChange={handleFilterOptionSelection}
+                  checked={option === filters.filterOption}
                 />
                 <label htmlFor="ingredient1" className="ml-2">
                   {_.startCase(option)}

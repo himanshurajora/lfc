@@ -2,6 +2,7 @@ import { createContext } from 'react';
 import { FilterOptions } from './types';
 import { ProjectsResponse, UsersResponse } from './db.types';
 import { FILTER_INITIAL_VALUE } from './constants';
+import { AddProjectDto } from './validation/addProjectValidation';
 
 interface StoreContext {
   filters: FilterOptions;
@@ -14,6 +15,7 @@ interface StoreContext {
   setLoading: (loading: boolean) => void;
   globalSearch: string | null;
   setGlobalSearch: (text: string) => void;
+  addProject: (project: AddProjectDto) => Promise<ProjectsResponse | void>;
 }
 
 export const StoreContext = createContext<StoreContext>({
@@ -25,4 +27,5 @@ export const StoreContext = createContext<StoreContext>({
   setLoading: () => {},
   globalSearch: null,
   setGlobalSearch: () => {},
+  addProject: () => Promise.resolve(),
 });

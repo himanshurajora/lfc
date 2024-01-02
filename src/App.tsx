@@ -23,6 +23,7 @@ function App() {
     setFilters,
     globalSearch,
     setGlobalSearch,
+    addProject,
   } = useProjects();
 
   return (
@@ -45,6 +46,7 @@ function App() {
             setLoading: setProjectsLoading,
             globalSearch,
             setGlobalSearch,
+            addProject,
           }}
         >
           <Navbar></Navbar>

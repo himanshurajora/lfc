@@ -11,6 +11,7 @@
     "typegen": "npx pocketbase-typegen --env -o src/db.types.ts"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.3.3",
     "@types/lodash": "^4.14.202",
     "chart.js": "^4.4.1",
     "lodash": "^4.17.21",
@@ -21,7 +22,9 @@
     "quill": "^1.3.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-transition-group": "^4.4.5"
+    "react-hook-form": "^7.49.2",
+    "react-transition-group": "^4.4.5",
+    "yup": "^1.3.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
