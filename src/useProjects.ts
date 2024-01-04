@@ -10,19 +10,23 @@ import { FilterOptions } from './types';
 import _ from 'lodash';
 import { client } from './db';
 import { AddProjectDto } from './validation/addProjectValidation';
+import { ClientResponseError } from 'pocketbase';
 
 export const useProjects = () => {
   const [filters, setFilters] = useState<FilterOptions>(FILTER_INITIAL_VALUE);
   const [globalSearch, setGlobalSearch] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLastPage, setIsLastPage] = useState(false);
 
   const [projects, setProjects] = useState<
-    ProjectsResponse<{ author: UsersResponse }>[]
-  >([]);
+    ProjectsResponse<{ author: UsersResponse }>[] | null
+  >(null);
 
   const fetch = useCallback(
     async (page?: number) => {
+      setLoading(true);
+      setIsLastPage(false);
       let raw_filter = `skill_level >= ${
         filters.skill_level_range[0] / 10
       } && skill_level <= ${filters.skill_level_range[1] / 10}`;
@@ -77,14 +81,27 @@ export const useProjects = () => {
           }
         )
         .then((response) => {
-          if (page) setCurrentPage(page + 1);
-          setProjects((projects) => [...projects, ...response.items]);
-          return !!response.items.length;
+          if (response.page <= response.totalPages) {
+            setProjects(
+              (projects) => projects && [...projects, ...response.items]
+            );
+          }
+
+          // Keep at right after the last page always
+          if (response.page > response.totalPages) {
+            setCurrentPage(response.totalPages);
+          }
+          setLoading(false);
+          setIsLastPage(response.page >= response.totalPages);
+          return response.page < response.totalPages;
         })
         .catch((err) => {
           console.log(err);
-          setProjects([]);
-          return false;
+          if (!(err instanceof ClientResponseError)) {
+            setLoading(false);
+            return false;
+          }
+          return true;
         });
     },
     [filters, globalSearch]
@@ -92,7 +109,8 @@ export const useProjects = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters]);
+    setProjects([]);
+  }, [filters, globalSearch]);
 
   useEffect(() => {
     fetch();
@@ -125,8 +143,10 @@ export const useProjects = () => {
       });
   };
 
-  const nextPage = () => {
-    return fetch(currentPage + 1);
+  const nextPage = async () => {
+    const hasData = await fetch(currentPage + 1);
+    setCurrentPage((currentPage) => currentPage + 1);
+    return hasData;
   };
 
   return {
@@ -141,5 +161,6 @@ export const useProjects = () => {
     addProject,
     deleteProject,
     nextPage,
+    isLastPage,
   };
 };

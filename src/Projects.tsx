@@ -1,18 +1,35 @@
 import _ from 'lodash';
-import { useContext } from 'react';
+import { Skeleton } from 'primereact/skeleton';
+import { UIEvent, useContext, useEffect, useState } from 'react';
 import { ProjectCard } from './ProjectCard';
 import { StoreContext } from './StoreContext';
 
 export const Projects = () => {
-  const { projects, nextPage } = useContext(StoreContext);
-
-  const handleScroll = (e: any) => {
+  const { projects, nextPage, loading, isLastPage } = useContext(StoreContext);
+  const [end, setEnd] = useState(false);
+  const handleScroll = async (e: UIEvent<HTMLDivElement>) => {
+    if (loading) return;
+    if (!e || !e.target) return;
+    const target = e.target as HTMLDivElement;
     const bottom =
-      e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
+      target.scrollHeight - target.scrollTop === target.clientHeight;
     if (bottom) {
-      nextPage();
+      const hasData = await nextPage();
+      console.log({ hasData });
+      if (!hasData) {
+        setEnd(true);
+      } else {
+        setEnd(false);
+      }
     }
   };
+
+  useEffect(() => {
+    if (loading) setEnd(false);
+  }, [loading]);
+
+  const noProjects = !loading && !!projects && !projects.length;
+
   return (
     <div
       className="w-full flex-1 flex flex-col p-5 gap-3 max-h-[90vh] overflow-auto"
@@ -22,6 +39,14 @@ export const Projects = () => {
         _.map(projects, (project, index) => {
           return <ProjectCard project={project} key={index}></ProjectCard>;
         })}
+      {!noProjects && !end && !isLastPage && (
+        <div className="w-full flex flex-col gap-3">
+          <Skeleton className="w-full min-h-40"></Skeleton>
+        </div>
+      )}
+      {noProjects && (
+        <div className="flex w-full justify-center">No Projects</div>
+      )}
     </div>
   );
 };
