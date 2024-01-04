@@ -17,6 +17,7 @@ interface StoreContext {
   setGlobalSearch: (text: string) => void;
   addProject: (project: AddProjectDto) => Promise<ProjectsResponse | void>;
   deleteProject: (projectId: string) => Promise<boolean>;
+  nextPage: () => Promise<boolean>;
 }
 
 export const StoreContext = createContext<StoreContext>({
@@ -30,4 +31,5 @@ export const StoreContext = createContext<StoreContext>({
   setGlobalSearch: () => {},
   addProject: () => Promise.resolve(),
   deleteProject: () => Promise.resolve(false),
+  nextPage: () => Promise.resolve(false),
 });
