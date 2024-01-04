@@ -9,10 +9,10 @@ jobs:
     steps:
       - name: Checkout files
         uses: actions/checkout@v4
-      - name: Use Node.js 12.10.0
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
-          node-version: 12.10.0
+          node-version: ${{ matrix.node-version }}
           cache: 'npm'
       - run: npm i && npm run build
       # now deploy to firebase
