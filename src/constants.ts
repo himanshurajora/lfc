@@ -23,4 +23,4 @@ export const FILTER_INITIAL_VALUE: FilterOptions = {
 
 export const supportedLanguages = _.values(ProjectsLanguagesOptions);
 
-export const ProjectsPageSize = 3;
+export const ProjectsPageSize = 10;
