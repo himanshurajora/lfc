@@ -82,6 +82,12 @@ export const useProjects = () => {
     fetch();
   }, [fetch]);
 
+  useEffect(() => {
+    client.collection('projects').subscribe('*', () => {
+      fetch();
+    });
+  }, [fetch]);
+
   const addProject = async (project: AddProjectDto) => {
     if (client.authStore.model)
       return client

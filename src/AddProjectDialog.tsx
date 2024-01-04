@@ -6,7 +6,7 @@ import { InputText } from 'primereact/inputtext';
 import { Message } from 'primereact/message';
 import { MultiSelect } from 'primereact/multiselect';
 import { Slider } from 'primereact/slider';
-import { Dispatch, FC, SetStateAction, useContext, useEffect } from 'react';
+import { Dispatch, FC, SetStateAction, useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import {
   AddProjectDto,
@@ -37,12 +37,6 @@ export const AddProjectForm: FC<AddProjectFormProps> = ({
     mode: 'onChange',
     resolver: yupResolver<AddProjectDto>(validateAddProject),
   });
-
-  const values = watch();
-
-  useEffect(() => {
-    trigger();
-  }, [values]);
 
   const handleFormSubmit = async () => {
     try {
@@ -150,6 +144,7 @@ export const AddProjectForm: FC<AddProjectFormProps> = ({
             value={watch('languages')}
             onChange={(e) => {
               setValue('languages', e.value);
+              trigger();
             }}
             options={_.map(ProjectsLanguagesOptions, (value, key) => {
               return {
