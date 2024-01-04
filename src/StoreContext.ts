@@ -16,6 +16,7 @@ interface StoreContext {
   globalSearch: string | null;
   setGlobalSearch: (text: string) => void;
   addProject: (project: AddProjectDto) => Promise<ProjectsResponse | void>;
+  deleteProject: (projectId: string) => Promise<boolean>;
 }
 
 export const StoreContext = createContext<StoreContext>({
@@ -28,4 +29,5 @@ export const StoreContext = createContext<StoreContext>({
   globalSearch: null,
   setGlobalSearch: () => {},
   addProject: () => Promise.resolve(),
+  deleteProject: () => Promise.resolve(false),
 });

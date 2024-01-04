@@ -86,8 +86,23 @@ export const useProjects = () => {
     if (client.authStore.model)
       return client
         .collection('projects')
-        .create({ ...project, author: client.authStore.model.id });
+        .create({ ...project, author: client.authStore.model.id })
+        .then((record) => {
+          fetch();
+          return record;
+        });
   };
+
+  const deleteProject = async (projectId: string) => {
+    return client
+      .collection('projects')
+      .delete(projectId)
+      .then((result) => {
+        fetch();
+        return result;
+      });
+  };
+
   const [loading, setLoading] = useState(false);
 
   return {
@@ -100,5 +115,6 @@ export const useProjects = () => {
     globalSearch,
     setGlobalSearch,
     addProject,
+    deleteProject,
   };
 };

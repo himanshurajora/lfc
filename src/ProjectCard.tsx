@@ -1,14 +1,15 @@
+import _ from 'lodash';
+import moment from 'moment';
+import { Button } from 'primereact/button';
 import { Chip } from 'primereact/chip';
 import { Divider } from 'primereact/divider';
 import { Panel } from 'primereact/panel';
 import { ProgressBar } from 'primereact/progressbar';
-import { FC } from 'react';
+import { FC, useContext } from 'react';
+import { StoreContext } from './StoreContext';
+import { client } from './db';
 import { ProjectsResponse, UsersResponse } from './db.types';
 import { getGithubProfileUrl } from './utils';
-import _ from 'lodash';
-import moment from 'moment';
-import { Button } from 'primereact/button';
-import { client } from './db';
 
 export interface ProjectCardProps {
   project: ProjectsResponse<{ author: UsersResponse }>;
@@ -16,6 +17,8 @@ export interface ProjectCardProps {
 }
 
 export const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
+  const { deleteProject } = useContext(StoreContext);
+
   return (
     <Panel header={project.name} toggleable>
       <div className="w-full flex flex-wrap gap-2">
@@ -70,7 +73,12 @@ export const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
           <>
             <Divider />
             <div className="flex justify-end">
-              <Button severity="danger">Delete</Button>
+              <Button
+                severity="danger"
+                onClick={() => deleteProject(project.id)}
+              >
+                Delete
+              </Button>
             </div>
           </>
         )}

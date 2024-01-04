@@ -14,17 +14,7 @@ function App() {
     loading: userLoading,
     setLoading: setUserLoading,
   } = useUserState();
-  const {
-    loading: projectsLoading,
-    projects,
-    setProjects,
-    setLoading: setProjectsLoading,
-    filters,
-    setFilters,
-    globalSearch,
-    setGlobalSearch,
-    addProject,
-  } = useProjects();
+  const projectFeatures = useProjects();
 
   return (
     <>
@@ -36,19 +26,7 @@ function App() {
           setLoading: setUserLoading,
         }}
       >
-        <StoreContext.Provider
-          value={{
-            filters,
-            loading: projectsLoading,
-            projects,
-            setProjects,
-            setFilters,
-            setLoading: setProjectsLoading,
-            globalSearch,
-            setGlobalSearch,
-            addProject,
-          }}
-        >
+        <StoreContext.Provider value={projectFeatures}>
           <Navbar></Navbar>
           <Dashboard></Dashboard>
         </StoreContext.Provider>

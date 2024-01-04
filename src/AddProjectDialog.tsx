@@ -6,7 +6,7 @@ import { InputText } from 'primereact/inputtext';
 import { Message } from 'primereact/message';
 import { MultiSelect } from 'primereact/multiselect';
 import { Slider } from 'primereact/slider';
-import { Dispatch, FC, SetStateAction, useContext } from 'react';
+import { Dispatch, FC, SetStateAction, useContext, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import {
   AddProjectDto,
@@ -27,22 +27,22 @@ export const AddProjectForm: FC<AddProjectFormProps> = ({
   const {
     register,
     setValue,
+    trigger,
     formState: { errors, isValid, isValidating, isLoading, isSubmitting },
     watch,
     getValues,
     reset,
+    handleSubmit,
   } = useForm<AddProjectDto>({
     mode: 'onChange',
     resolver: yupResolver<AddProjectDto>(validateAddProject),
-    defaultValues: {
-      description: '',
-      github_repository: '',
-      home_page: '',
-      languages: [],
-      name: '',
-      skill_level: 10,
-    },
   });
+
+  const values = watch();
+
+  useEffect(() => {
+    trigger();
+  }, [values]);
 
   const handleFormSubmit = async () => {
     try {
@@ -80,7 +80,7 @@ export const AddProjectForm: FC<AddProjectFormProps> = ({
         type="submit"
         icon="pi pi-check"
         onClick={handleFormSubmit}
-        disabled={isLoading || isSubmitting || !isValid || isValidating}
+        disabled={isLoading || isSubmitting || isValidating || !isValid}
         autoFocus
       />
     </div>
@@ -95,7 +95,10 @@ export const AddProjectForm: FC<AddProjectFormProps> = ({
       footer={footerContent}
       maximizable
     >
-      <form className="flex flex-col gap-3">
+      <form
+        className="flex flex-col gap-3"
+        onSubmit={handleSubmit(handleFormSubmit)}
+      >
         <div className="flex flex-col flex-wrap align-items-center gap-2">
           <label htmlFor="name" className="p-sr-only">
             Name
@@ -104,6 +107,7 @@ export const AddProjectForm: FC<AddProjectFormProps> = ({
             placeholder="Name"
             className="flex-1"
             {...register('name')}
+            required
           />
           {errors.name && (
             <Message severity="error" text={errors.name.message} />
@@ -117,6 +121,7 @@ export const AddProjectForm: FC<AddProjectFormProps> = ({
             placeholder="Github URL"
             {...register('github_repository')}
             className="flex-1"
+            required
           />
           {errors.github_repository && (
             <Message severity="error" text={errors.github_repository.message} />
@@ -131,28 +136,38 @@ export const AddProjectForm: FC<AddProjectFormProps> = ({
             placeholder="Homepage"
             className="flex-1"
             {...register('home_page')}
+            required
           />
           {errors.home_page && (
             <Message severity="error" text={errors.home_page.message} />
           )}
         </div>
-        <MultiSelect
-          value={watch('languages')}
-          onChange={(e) => {
-            setValue('languages', e.value);
-          }}
-          options={_.map(ProjectsLanguagesOptions, (value, key) => {
-            return {
-              value,
-              label: key,
-            };
-          })}
-          filter
-          optionLabel="label"
-          placeholder="Select Languages"
-          maxSelectedLabels={3}
-          className="w-full md:w-20rem"
-        />
+        <div className="flex flex-col align-items-center gap-2">
+          <label htmlFor="languages" className="p-sr-only">
+            Languages
+          </label>
+          <MultiSelect
+            value={watch('languages')}
+            onChange={(e) => {
+              setValue('languages', e.value);
+            }}
+            options={_.map(ProjectsLanguagesOptions, (value, key) => {
+              return {
+                value,
+                label: key,
+              };
+            })}
+            filter
+            optionLabel="label"
+            placeholder="Select Languages"
+            maxSelectedLabels={3}
+            className="w-full md:w-20rem"
+            required
+          />
+          {errors.languages && (
+            <Message severity="error" text={errors.languages.message} />
+          )}
+        </div>
         <b className="ml-4">Skill Level:</b>
         <Slider
           className="mt-2 mx-6"
@@ -162,6 +177,7 @@ export const AddProjectForm: FC<AddProjectFormProps> = ({
               setValue('skill_level', event.value / 10);
           }}
           value={watch('skill_level') * 10}
+          required
         ></Slider>
         <div className="flex flex-row justify-between px-4 mt-1">
           <b>0</b>
@@ -175,6 +191,7 @@ export const AddProjectForm: FC<AddProjectFormProps> = ({
           onTextChange={(event) => {
             if (event.htmlValue) setValue('description', event.htmlValue);
           }}
+          required
         />
         <div className="flex flex-wrap flex-1 align-items-center gap-2">
           <label htmlFor="description" className="p-sr-only">
