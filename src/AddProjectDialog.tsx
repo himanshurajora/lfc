@@ -186,7 +186,6 @@ export const AddProjectForm: FC<AddProjectFormProps> = ({
           onTextChange={(event) => {
             if (event.htmlValue) setValue('description', event.htmlValue);
           }}
-          required
         />
         <div className="flex flex-wrap flex-1 align-items-center gap-2">
           <label htmlFor="description" className="p-sr-only">

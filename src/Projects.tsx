@@ -8,7 +8,7 @@ export const Projects = () => {
   const { projects, nextPage, loading, isLastPage } = useContext(StoreContext);
   const [end, setEnd] = useState(false);
   const handleScroll = async (e: UIEvent<HTMLDivElement>) => {
-    if (loading) return;
+    if (loading && isLastPage) return;
     if (!e || !e.target) return;
     const target = e.target as HTMLDivElement;
     const bottom =
@@ -39,7 +39,7 @@ export const Projects = () => {
         _.map(projects, (project, index) => {
           return <ProjectCard project={project} key={index}></ProjectCard>;
         })}
-      {!noProjects && !end && !isLastPage && (
+      {!isLastPage && !noProjects && !end && (
         <div className="w-full flex flex-col gap-3">
           <Skeleton className="w-full min-h-40"></Skeleton>
         </div>
