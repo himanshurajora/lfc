@@ -1,5 +1,6 @@
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
+import { Chip } from 'primereact/chip';
 import { FC, useContext, useState } from 'react';
 import { StoreContext } from './StoreContext';
 import { useAuth } from './useAuth';
@@ -30,7 +31,7 @@ export const Navbar: FC<NavbarProps> = () => {
       <div className="font-bold min-w-full flex shadow-md z-20 border-red-300 justify-between px-3 py-2">
         <div className="flex flex-1 gap-2">
           <img src="/logo.png" width={50} height="auto" alt="LFC's logo" />
-          <span className="text-xl p-2">Looking For Contributors</span>
+          <span className="text-xl p-2">LFC <Chip label='beta' className='h-6' data-pr-tooltip='Currently in development'/> </span>
         </div>
         <div className="flex-1 flex justify-center">
           <span className="p-input-icon-left">
