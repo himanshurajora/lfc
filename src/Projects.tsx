@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Skeleton } from 'primereact/skeleton';
+import { ProgressSpinner } from 'primereact/progressspinner';
 import { UIEvent, useContext, useEffect, useState } from 'react';
 import { ProjectCard } from './ProjectCard';
 import { StoreContext } from './StoreContext';
@@ -41,7 +41,7 @@ export const Projects = () => {
         })}
       {!isLastPage && !noProjects && !end && (
         <div className="w-full flex flex-col gap-3">
-          <Skeleton className="w-full min-h-40"></Skeleton>
+          <ProgressSpinner />
         </div>
       )}
       {noProjects && (
