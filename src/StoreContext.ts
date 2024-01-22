@@ -19,6 +19,7 @@ interface StoreContext {
   deleteProject: (projectId: string) => Promise<boolean>;
   nextPage: () => Promise<boolean>;
   isLastPage: boolean;
+  refetch: () => void;
 }
 
 export const StoreContext = createContext<StoreContext>({
@@ -34,4 +35,5 @@ export const StoreContext = createContext<StoreContext>({
   deleteProject: () => Promise.resolve(false),
   nextPage: () => Promise.resolve(false),
   isLastPage: false,
+  refetch: () => {},
 });

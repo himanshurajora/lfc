@@ -122,15 +122,22 @@ export const useProjects = () => {
     });
   }, [fetch]);
 
+  const refetch = () => {
+    if (typeof fetch === 'function') {
+      setProjects([]);
+      fetch();
+    }
+  };
+
   const addProject = async (project: AddProjectDto) => {
     if (client.authStore.model)
       return client
         .collection('projects')
         .create({ ...project, author: client.authStore.model.id })
         .then((record) => {
-          fetch();
           return record;
-        });
+        })
+        .finally(refetch);
   };
 
   const deleteProject = async (projectId: string) => {
@@ -140,7 +147,8 @@ export const useProjects = () => {
       .then((result) => {
         fetch();
         return result;
-      });
+      })
+      .finally(refetch);
   };
 
   const nextPage = async () => {
@@ -162,5 +170,6 @@ export const useProjects = () => {
     deleteProject,
     nextPage,
     isLastPage,
+    refetch,
   };
 };

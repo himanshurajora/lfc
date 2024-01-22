@@ -5,6 +5,7 @@ import { Chip } from 'primereact/chip';
 import { Divider } from 'primereact/divider';
 import { Panel } from 'primereact/panel';
 import { ProgressBar } from 'primereact/progressbar';
+import { confirmDialog } from 'primereact/confirmdialog';
 import { FC, useContext } from 'react';
 import { StoreContext } from './StoreContext';
 import { client } from './db';
@@ -18,6 +19,16 @@ export interface ProjectCardProps {
 
 export const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
   const { deleteProject } = useContext(StoreContext);
+
+  const confirmAndDelete = (projectId: string) => {
+    confirmDialog({
+      message: 'Are you sure you want to delete this project?',
+      header: 'Delete Confirmation',
+      icon: 'pi pi-info-circle',
+      acceptClassName: 'p-button-danger',
+      accept: () => deleteProject(projectId),
+    });
+  };
 
   return (
     <Panel header={project.name} toggleable>
@@ -75,7 +86,7 @@ export const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
             <div className="flex justify-end">
               <Button
                 severity="danger"
-                onClick={() => deleteProject(project.id)}
+                onClick={() => confirmAndDelete(project.id)}
               >
                 Delete
               </Button>
