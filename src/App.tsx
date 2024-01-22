@@ -1,4 +1,5 @@
 import 'primeicons/primeicons.css';
+import { ConfirmDialog } from 'primereact/confirmdialog';
 import './App.css';
 import { AuthContext } from './AuthContext';
 import { Dashboard } from './Dashboard';
@@ -30,6 +31,7 @@ function App() {
           <Navbar></Navbar>
           <Dashboard></Dashboard>
         </StoreContext.Provider>
+        <ConfirmDialog />
       </AuthContext.Provider>
     </>
   );

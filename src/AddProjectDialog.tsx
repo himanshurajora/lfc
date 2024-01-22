@@ -6,7 +6,7 @@ import { InputText } from 'primereact/inputtext';
 import { Message } from 'primereact/message';
 import { MultiSelect } from 'primereact/multiselect';
 import { Slider } from 'primereact/slider';
-import { Dispatch, FC, SetStateAction, useContext } from 'react';
+import { Dispatch, FC, SetStateAction, useContext, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import {
   AddProjectDto,
@@ -79,6 +79,11 @@ export const AddProjectForm: FC<AddProjectFormProps> = ({
       />
     </div>
   );
+
+  const [description, languages] = [watch('description'), watch('languages')];
+  useEffect(() => {
+    if (languages && description && typeof trigger === 'function') trigger();
+  }, [languages, description, trigger]);
 
   return (
     <Dialog

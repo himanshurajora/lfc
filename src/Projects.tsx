@@ -15,7 +15,6 @@ export const Projects = () => {
       target.scrollHeight - target.scrollTop === target.clientHeight;
     if (bottom) {
       const hasData = await nextPage();
-      console.log({ hasData });
       if (!hasData) {
         setEnd(true);
       } else {
