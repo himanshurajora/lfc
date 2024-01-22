@@ -1,4 +1,5 @@
 import { yupResolver } from '@hookform/resolvers/yup';
+import _ from 'lodash';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Editor } from 'primereact/editor';
@@ -8,13 +9,12 @@ import { MultiSelect } from 'primereact/multiselect';
 import { Slider } from 'primereact/slider';
 import { Dispatch, FC, SetStateAction, useContext, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { StoreContext } from './StoreContext';
+import { ProjectsLanguagesOptions } from './db.types';
 import {
   AddProjectDto,
   validateAddProject,
 } from './validation/addProjectValidation';
-import { ProjectsLanguagesOptions } from './db.types';
-import _ from 'lodash';
-import { StoreContext } from './StoreContext';
 export interface AddProjectFormProps {
   visible: boolean;
   setVisible: Dispatch<SetStateAction<boolean>>;
@@ -36,6 +36,9 @@ export const AddProjectForm: FC<AddProjectFormProps> = ({
   } = useForm<AddProjectDto>({
     mode: 'onChange',
     resolver: yupResolver<AddProjectDto>(validateAddProject),
+    defaultValues: {
+      skill_level: 5,
+    },
   });
 
   const handleFormSubmit = async () => {
@@ -80,7 +83,11 @@ export const AddProjectForm: FC<AddProjectFormProps> = ({
     </div>
   );
 
-  const [description, languages] = [watch('description'), watch('languages')];
+  const [description, languages, skillLevel] = [
+    watch('description'),
+    watch('languages'),
+    watch('skill_level'),
+  ];
   useEffect(() => {
     if (languages && description && typeof trigger === 'function') trigger();
   }, [languages, description, trigger]);
@@ -168,7 +175,7 @@ export const AddProjectForm: FC<AddProjectFormProps> = ({
             <Message severity="error" text={errors.languages.message} />
           )}
         </div>
-        <b className="ml-4">Skill Level:</b>
+        <b className="ml-4">Skill Level: {skillLevel}</b>
         <Slider
           className="mt-2 mx-6"
           step={10}
