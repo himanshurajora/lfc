@@ -202,8 +202,8 @@ export const InterestSection: FC<InterestSectionProps> = ({ project }) => {
               key={interest.id}
               className="p-4 border rounded-lg bg-white hover:bg-slate-50 transition-colors"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <Chip
                     label={interest.username}
                     image={githubService.getAvatarUrl(interest.username)}
@@ -261,6 +261,7 @@ export const InterestSection: FC<InterestSectionProps> = ({ project }) => {
         header="Express Interest"
         visible={showDialog}
         style={{ width: '40vw' }}
+        breakpoints={{ '960px': '70vw', '640px': '95vw' }}
         onHide={() => setShowDialog(false)}
       >
         <div className="flex flex-col gap-4">

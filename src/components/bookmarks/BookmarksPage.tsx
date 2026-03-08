@@ -68,8 +68,8 @@ export const BookmarksPage: FC = () => {
   if (loading) return <LoadingSpinner message="Loading bookmarks..." />;
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">
+    <div className="max-w-4xl mx-auto px-3 py-4 sm:p-4">
+      <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
         <i className="pi pi-bookmark-fill text-yellow-500 mr-2" />
         Your Bookmarks
       </h1>

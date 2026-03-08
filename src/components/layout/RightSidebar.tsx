@@ -11,7 +11,12 @@ import { useNavigate } from 'react-router-dom';
 /**
  * Right sidebar showing sponsors, ads, and smart recommendations.
  */
-export const RightSidebar: FC = () => {
+interface RightSidebarProps {
+  /** When true, renders full-width for mobile drawer instead of fixed desktop sidebar. */
+  mobile?: boolean;
+}
+
+export const RightSidebar: FC<RightSidebarProps> = ({ mobile = false }) => {
   const { user } = useAuthContext();
   const [recommended, setRecommended] = useState<Project[]>([]);
   const [loadingRecs, setLoadingRecs] = useState(false);
@@ -46,7 +51,10 @@ export const RightSidebar: FC = () => {
   }, [user]);
 
   return (
-    <aside className="w-1/5 bg-slate-100 min-h-[90vh] max-h-[90vh] rounded-l-lg p-4 flex flex-col gap-3 overflow-auto">
+    <aside className={mobile
+      ? 'w-full bg-slate-100 p-4 flex flex-col gap-3 overflow-auto'
+      : 'w-full bg-slate-100 rounded-l-lg p-4 flex flex-col gap-3'
+    }>
       {/* Sponsors */}
       <Card title="Sponsors" className="text-sm">
         <p className="m-0">@himanshurajora</p>

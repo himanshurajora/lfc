@@ -80,30 +80,30 @@ export const ProjectDetail: FC = () => {
     : new Date();
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
+    <div className="max-w-5xl mx-auto px-3 py-4 sm:p-6">
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold">{project.name}</h1>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4 gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2 flex-wrap">
+            <h1 className="text-xl sm:text-3xl font-bold">{project.name}</h1>
             <Tag value={_.startCase(project.status)} severity="info" />
             <Tag value={_.startCase(project.category)} className="bg-purple-100 text-purple-700" />
           </div>
-          <div className="flex items-center gap-2 text-gray-500 text-sm">
+          <div className="flex items-center gap-2 text-gray-500 text-sm flex-wrap">
             <Chip
               label={project.authorUsername}
               image={githubService.getAvatarUrl(project.authorUsername)}
               className="cursor-pointer"
               onClick={() => navigate(`/profile/${project.authorId}`)}
             />
-            <span>·</span>
+            <span className="hidden sm:inline">·</span>
             <span>{formatDistanceToNow(createdDate, { addSuffix: true })}</span>
-            <span>·</span>
-            <span>{format(createdDate, 'PPp')}</span>
+            <span className="hidden sm:inline">·</span>
+            <span className="hidden sm:inline">{format(createdDate, 'PPp')}</span>
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-shrink-0">
           <Button
             icon={isBookmarked(project.id) ? 'pi pi-bookmark-fill' : 'pi pi-bookmark'}
             severity="warning"
@@ -123,7 +123,7 @@ export const ProjectDetail: FC = () => {
       </div>
 
       {/* Stats Bar */}
-      <div className="flex gap-6 mb-4 p-3 bg-slate-50 rounded-lg">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4 p-3 bg-slate-50 rounded-lg">
         <div className="text-center">
           <div className="text-lg font-bold">{project.viewCount}</div>
           <div className="text-xs text-gray-500">Views</div>
@@ -142,7 +142,6 @@ export const ProjectDetail: FC = () => {
         </div>
         {repoInfo && (
           <>
-            <Divider layout="vertical" />
             <div className="text-center">
               <div className="text-lg font-bold">{repoInfo.stars}</div>
               <div className="text-xs text-gray-500">GitHub Stars</div>
@@ -167,7 +166,7 @@ export const ProjectDetail: FC = () => {
         />
         <Divider />
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <b className="text-sm">Skill Level: {project.skillLevel}/10</b>
             <ProgressBar
@@ -209,7 +208,7 @@ export const ProjectDetail: FC = () => {
 
         <Divider />
 
-        <div className="flex gap-3">
+        <div className="flex gap-2 sm:gap-3 flex-wrap">
           <Button
             label="GitHub Repository"
             icon="pi pi-github"

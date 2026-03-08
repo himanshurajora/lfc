@@ -89,7 +89,7 @@ export const CommentItem: FC<CommentItemProps> = ({
   return (
     <div
       className={`flex flex-col gap-2 ${
-        depth > 0 ? 'ml-6 pl-4 border-l-2 border-slate-200' : ''
+        depth > 0 ? 'ml-3 sm:ml-6 pl-2 sm:pl-4 border-l-2 border-slate-200' : ''
       }`}
     >
       <div className="p-3 bg-white rounded-lg border hover:bg-slate-50 transition-colors">

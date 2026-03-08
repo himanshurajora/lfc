@@ -146,6 +146,7 @@ export const AddProjectDialog: FC<AddProjectDialogProps> = ({
       header="Add Project"
       visible={visible}
       style={{ width: '55vw' }}
+      breakpoints={{ '960px': '80vw', '640px': '95vw' }}
       onHide={() => setVisible(false)}
       footer={footerContent}
       maximizable
@@ -183,8 +184,7 @@ export const AddProjectDialog: FC<AddProjectDialogProps> = ({
           )}
         </div>
 
-        {/* Two columns */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Homepage */}
           <div className="flex flex-col gap-1">
             <label className="font-semibold text-sm">Homepage</label>
@@ -230,8 +230,7 @@ export const AddProjectDialog: FC<AddProjectDialogProps> = ({
           )}
         </div>
 
-        {/* Category, Status, License */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="flex flex-col gap-1">
             <label className="font-semibold text-sm">Category *</label>
             <Dropdown
@@ -284,8 +283,7 @@ export const AddProjectDialog: FC<AddProjectDialogProps> = ({
           </div>
         </div>
 
-        {/* Time Commitment & Maintainer Count */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex flex-col gap-1">
             <label className="font-semibold text-sm">Time Commitment</label>
             <InputText

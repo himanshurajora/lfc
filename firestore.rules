@@ -22,6 +22,12 @@ service cloud.firestore {
       allow update: if isOwner(userId);
       allow delete: if false;
 
+      // Private profile data (email, etc.) — only the owner can read/write
+      match /private/{docId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId);
+      }
+
       // Bookmarks subcollection — scoped to owning user
       match /bookmarks/{bookmarkId} {
         allow read: if isOwner(userId);

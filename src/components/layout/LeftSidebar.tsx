@@ -8,10 +8,15 @@ import { SUPPORTED_LANGUAGES } from '../../types/project';
 import { OrderByOptions, FilterByOptions } from '../../types/filters';
 import { PROJECT_CATEGORIES, PROJECT_STATUSES } from '../../types/project';
 
+interface LeftSidebarProps {
+  /** When true, renders full-width for mobile drawer instead of fixed desktop sidebar. */
+  mobile?: boolean;
+}
+
 /**
  * Left sidebar with filter controls for project discovery.
  */
-export const LeftSidebar: FC = () => {
+export const LeftSidebar: FC<LeftSidebarProps> = ({ mobile = false }) => {
   const { filters, setFilters } = useStoreContext();
 
   const handleSkillRangeChange = (e: SliderChangeEvent) => {
@@ -51,7 +56,10 @@ export const LeftSidebar: FC = () => {
   };
 
   return (
-    <aside className="w-1/5 min-h-[90vh] max-h-[90vh] bg-slate-100 rounded-r-lg py-3 px-2 flex flex-col gap-5 overflow-auto">
+    <aside className={mobile
+      ? 'w-full bg-slate-100 py-3 px-2 flex flex-col gap-5 overflow-auto'
+      : 'w-full bg-slate-100 rounded-r-lg py-3 px-2 flex flex-col gap-5'
+    }>
       {/* Skill Level */}
       <section className="flex flex-col gap-1 bg-slate-200 px-1 py-2 rounded">
         <b className="ml-4">Skill Level:</b>

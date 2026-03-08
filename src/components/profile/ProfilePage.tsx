@@ -271,6 +271,7 @@ export const ProfilePage: FC = () => {
         visible={editDialogVisible}
         onHide={() => setEditDialogVisible(false)}
         className="w-full md:w-[28rem]"
+        breakpoints={{ '640px': '95vw' }}
         modal
       >
         <div className="flex flex-col gap-4 pt-2">

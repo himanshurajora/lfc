@@ -10,6 +10,7 @@ import {
   getDoc,
   serverTimestamp,
   setDoc,
+  writeBatch,
 } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import { UserProfile } from '../types/user';
@@ -59,21 +60,40 @@ export const authService = {
     const snapshot = await getDoc(userRef);
 
     if (snapshot.exists()) {
-      // Update last-seen fields
-      await setDoc(
-        userRef,
-        {
+      const data = snapshot.data();
+
+      // Migrate: if email exists in public doc, move it to private subcollection and remove it
+      if (data.email) {
+        const batch = writeBatch(db);
+        batch.set(doc(db, 'users', user.uid, 'private', 'profile'), {
+          email: data.email,
+        }, { merge: true });
+        batch.update(userRef, {
+          email: '',
           avatarUrl: user.photoURL ?? '',
           updatedAt: serverTimestamp(),
-        },
-        { merge: true },
-      );
-      return { uid: user.uid, ...snapshot.data() } as UserProfile;
+        });
+        await batch.commit();
+      } else {
+        // Update last-seen fields
+        await setDoc(
+          userRef,
+          {
+            avatarUrl: user.photoURL ?? '',
+            updatedAt: serverTimestamp(),
+          },
+          { merge: true },
+        );
+      }
+
+      // Fetch email from private subcollection for the current user
+      const email = await this.getOwnEmail(user.uid);
+      return { uid: user.uid, ...data, email } as UserProfile;
     }
 
     // First login — create profile
     const newProfile: Omit<UserProfile, 'uid'> = {
-      email: user.email ?? '',
+      email: '',
       displayName: user.displayName ?? githubUsername,
       username: githubUsername,
       avatarUrl: user.photoURL ?? '',
@@ -88,15 +108,35 @@ export const authService = {
       updatedAt: serverTimestamp() as UserProfile['updatedAt'],
     };
 
-    await setDoc(userRef, newProfile);
-    return { uid: user.uid, ...newProfile };
+    // Write public profile + private email in a batch
+    const batch = writeBatch(db);
+    batch.set(userRef, newProfile);
+    batch.set(doc(db, 'users', user.uid, 'private', 'profile'), {
+      email: user.email ?? '',
+    });
+    await batch.commit();
+
+    return { uid: user.uid, ...newProfile, email: user.email ?? '' };
   },
 
   /** Fetch a user profile by UID. */
   async getProfile(uid: string): Promise<UserProfile | null> {
     const snapshot = await getDoc(doc(db, 'users', uid));
     if (!snapshot.exists()) return null;
-    return { uid: snapshot.id, ...snapshot.data() } as UserProfile;
+    return { uid: snapshot.id, ...snapshot.data(), email: '' } as UserProfile;
+  },
+
+  /** Fetch the current user's own email from the private subcollection. */
+  async getOwnEmail(uid: string): Promise<string> {
+    try {
+      const snapshot = await getDoc(doc(db, 'users', uid, 'private', 'profile'));
+      if (snapshot.exists()) {
+        return (snapshot.data().email as string) ?? '';
+      }
+    } catch {
+      // Other user’s private doc — permission denied is expected
+    }
+    return '';
   },
 
   /** Update the current user's profile. */

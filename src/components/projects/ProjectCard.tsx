@@ -62,9 +62,9 @@ export const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
   };
 
   const headerTemplate = (
-    <div className="flex items-center justify-between w-full">
-      <div className="flex items-center gap-2">
-        <span className="font-bold text-lg">{project.name}</span>
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-1">
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="font-bold text-base sm:text-lg">{project.name}</span>
         <Tag
           value={_.startCase(project.status)}
           severity={STATUS_SEVERITY[project.status] ?? 'info'}
@@ -75,7 +75,7 @@ export const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
           className="text-xs bg-purple-100 text-purple-700"
         />
       </div>
-      <div className="flex items-center gap-2 text-sm text-gray-500">
+      <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500 flex-wrap">
         <span className="flex items-center gap-1">
           <i className="pi pi-eye" /> {project.viewCount}
         </span>
@@ -138,7 +138,7 @@ export const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
       <Divider />
 
       {/* Links */}
-      <div className="flex flex-row gap-3">
+      <div className="flex flex-row gap-2 sm:gap-3 flex-wrap">
         <Button
           label="GitHub"
           icon="pi pi-github"
@@ -193,8 +193,8 @@ export const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
       <Divider />
 
       {/* Actions */}
-      <div className="flex justify-between items-center">
-        <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button
             label="Details"
             icon="pi pi-info-circle"

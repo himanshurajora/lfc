@@ -173,8 +173,8 @@ export const IssueList: FC<IssueListProps> = ({ project }) => {
                 issue.isOpen ? 'bg-white' : 'bg-gray-50 opacity-70'
               }`}
             >
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <i
                     className={`pi ${
                       issue.isOpen ? 'pi-circle text-green-500' : 'pi-check-circle text-gray-400'
@@ -250,6 +250,7 @@ export const IssueList: FC<IssueListProps> = ({ project }) => {
         header="Add Issue / Task"
         visible={showCreateDialog}
         style={{ width: '45vw' }}
+        breakpoints={{ '960px': '75vw', '640px': '95vw' }}
         onHide={() => setShowCreateDialog(false)}
       >
         <div className="flex flex-col gap-4">
@@ -288,7 +289,7 @@ export const IssueList: FC<IssueListProps> = ({ project }) => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="font-semibold text-sm block mb-1">
                 Difficulty *
