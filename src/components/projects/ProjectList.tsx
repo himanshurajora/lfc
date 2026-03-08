@@ -35,7 +35,7 @@ export const ProjectList = () => {
       onScroll={handleScroll}
     >
       {projects.map((project) => (
-        <ProjectCard project={project} key={project.id} />
+        <ProjectCard project={project} key={project.id} defaultExpanded />
       ))}
 
       {loading && <LoadingSpinner message="Loading projects..." />}

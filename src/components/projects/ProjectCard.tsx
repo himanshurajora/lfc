@@ -17,6 +17,8 @@ import { githubService } from '../../services/github.service';
 
 interface ProjectCardProps {
   project: Project;
+  /** Whether the card body is expanded by default. Defaults to false. */
+  defaultExpanded?: boolean;
 }
 
 const STATUS_SEVERITY: Record<string, 'success' | 'info' | 'warning' | 'danger'> = {
@@ -29,11 +31,11 @@ const STATUS_SEVERITY: Record<string, 'success' | 'info' | 'warning' | 'danger'>
 /**
  * Expandable project card showing all key project information.
  */
-export const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
+export const ProjectCard: FC<ProjectCardProps> = ({ project, defaultExpanded = false }) => {
   const { user } = useAuthContext();
   const { deleteProject } = useStoreContext();
   const { isBookmarked, toggleBookmark } = useBookmarks(user?.uid ?? null);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(defaultExpanded);
   const navigate = useNavigate();
 
   const isOwner = user?.uid === project.authorId;
