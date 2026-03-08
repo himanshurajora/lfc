@@ -1,0 +1,1 @@
+export { BookmarksPage } from './BookmarksPage';

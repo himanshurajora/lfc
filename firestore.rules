@@ -1,0 +1,102 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ──────────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isProjectAuthor(projectId) {
+      return get(/databases/$(database)/documents/projects/$(projectId)).data.authorId == request.auth.uid;
+    }
+
+    // ── Users ────────────────────────────────────────────────────
+    match /users/{userId} {
+      allow read: if true;
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if false;
+
+      // Bookmarks subcollection — scoped to owning user
+      match /bookmarks/{bookmarkId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId);
+        allow delete: if isOwner(userId);
+      }
+
+      // Notifications subcollection — scoped to owning user
+      match /notifications/{notificationId} {
+        allow read: if isOwner(userId);
+        allow update: if isOwner(userId);
+        // Any authenticated user can send a notification to another user
+        allow create: if isSignedIn();
+        allow delete: if false;
+      }
+    }
+
+    // ── Projects ─────────────────────────────────────────────────
+    match /projects/{projectId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+
+      // Author can update anything.
+      // Any authenticated user can increment counter fields only.
+      allow update: if isSignedIn() && (
+        resource.data.authorId == request.auth.uid ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+          ['interestCount', 'commentCount', 'bookmarkCount', 'viewCount']
+        )
+      );
+      allow delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
+
+      // Interests sub-collection
+      match /interests/{interestId} {
+        allow read: if true;
+        allow create: if isSignedIn();
+        // Interest creator or project owner can update (accept/reject/withdraw)
+        allow update: if isSignedIn() && (
+          resource.data.userId == request.auth.uid ||
+          isProjectAuthor(projectId)
+        );
+        // Interest creator or project owner can delete
+        allow delete: if isSignedIn() && (
+          resource.data.userId == request.auth.uid ||
+          isProjectAuthor(projectId)
+        );
+      }
+
+      // Issues sub-collection
+      match /issues/{issueId} {
+        allow read: if true;
+        allow create: if isSignedIn() && isProjectAuthor(projectId);
+        allow update: if isSignedIn() && isProjectAuthor(projectId);
+        allow delete: if isSignedIn() && isProjectAuthor(projectId);
+      }
+
+      // Comments sub-collection
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isSignedIn();
+        allow update: if isSignedIn() && resource.data.authorId == request.auth.uid;
+        // Comment author or project owner can delete
+        allow delete: if isSignedIn() && (
+          resource.data.authorId == request.auth.uid ||
+          isProjectAuthor(projectId)
+        );
+      }
+
+      // Analytics sub-collection
+      match /analytics/{docId} {
+        // Public read — anyone can view project analytics
+        allow read: if true;
+        // Any authenticated user can write analytics events (views, clicks)
+        allow write: if isSignedIn();
+      }
+    }
+  }
+}
