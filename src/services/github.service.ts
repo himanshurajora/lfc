@@ -1,4 +1,5 @@
 import { Octokit } from '@octokit/rest';
+import { SupportedLanguage, SUPPORTED_LANGUAGES } from '../types/project';
 
 /** Cache expiry in milliseconds (5 minutes). */
 const CACHE_TTL = 5 * 60 * 1000;
@@ -48,6 +49,54 @@ export interface RepoContributor {
   avatarUrl: string;
   contributions: number;
   profileUrl: string;
+}
+
+/** Lightweight repo info returned for the "import from GitHub" picker. */
+export interface UserRepo {
+  name: string;
+  fullName: string;
+  description: string;
+  htmlUrl: string;
+  homepage: string;
+  language: string;
+  languages: SupportedLanguage[];
+  license: string;
+  stars: number;
+  forks: number;
+  openIssues: number;
+  topics: string[];
+  archived: boolean;
+  updatedAt: string;
+}
+
+/**
+ * Map a GitHub language string to the closest SupportedLanguage value.
+ * Returns `'other'` if no match is found.
+ */
+function mapGitHubLanguage(lang: string | null): SupportedLanguage {
+  if (!lang) return 'other';
+
+  const lower = lang.toLowerCase();
+
+  // Direct matches
+  const supported = SUPPORTED_LANGUAGES as readonly string[];
+  if (supported.includes(lower)) return lower as SupportedLanguage;
+
+  // Common GitHub → LFC mappings
+  const aliases: Record<string, SupportedLanguage> = {
+    'c#': 'c#',
+    'c++': 'c++',
+    csharp: 'c#',
+    cpp: 'c++',
+    'objective-c': 'c++',
+    shell: 'other',
+    html: 'javascript',
+    css: 'javascript',
+    vue: 'javascript',
+    scss: 'javascript',
+  };
+
+  return aliases[lower] ?? 'other';
 }
 
 /**
@@ -194,6 +243,148 @@ export const githubService = {
   /** Get the GitHub avatar URL for a username. */
   getAvatarUrl(username: string): string {
     return `https://github.com/${username}.png`;
+  },
+
+  /**
+   * Fetch all public repositories for a GitHub user.
+   * Returns them sorted by stars (descending), excluding forks & archived repos.
+   */
+  async getUserRepos(username: string): Promise<UserRepo[]> {
+    const cacheKey = `user-repos:${username}`;
+    const cached = getCached<UserRepo[]>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const octokit = createOctokit();
+      const repos: UserRepo[] = [];
+      let page = 1;
+      let hasMore = true;
+
+      while (hasMore) {
+        const { data } = await octokit.repos.listForUser({
+          username,
+          type: 'owner',
+          sort: 'updated',
+          direction: 'desc',
+          per_page: 100,
+          page,
+        });
+
+        for (const r of data) {
+          if (r.fork || r.archived) continue;
+
+          const primaryLang = mapGitHubLanguage(r.language ?? null);
+          // Deduplicate while keeping 'other' only if nothing else fits
+          const langs: SupportedLanguage[] = primaryLang !== 'other'
+            ? [primaryLang]
+            : [];
+
+          repos.push({
+            name: r.name,
+            fullName: r.full_name,
+            description: r.description ?? '',
+            htmlUrl: r.html_url,
+            homepage: r.homepage ?? '',
+            language: r.language ?? '',
+            languages: langs.length ? langs : ['other'],
+            license: r.license?.spdx_id ?? '',
+            stars: r.stargazers_count ?? 0,
+            forks: r.forks_count ?? 0,
+            openIssues: r.open_issues_count ?? 0,
+            topics: r.topics ?? [],
+            archived: r.archived ?? false,
+            updatedAt: r.updated_at ?? '',
+          });
+        }
+
+        hasMore = data.length === 100;
+        page++;
+      }
+
+      // Sort by stars descending
+      repos.sort((a, b) => b.stars - a.stars);
+
+      setCache(cacheKey, repos);
+      return repos;
+    } catch (error) {
+      console.error('Failed to fetch user repos:', error);
+      return [];
+    }
+  },
+
+  /**
+   * Fetch the full language breakdown for a repo and return mapped SupportedLanguage array.
+   */
+  async getRepoLanguages(owner: string, repo: string): Promise<SupportedLanguage[]> {
+    const cacheKey = `repo-langs:${owner}/${repo}`;
+    const cached = getCached<SupportedLanguage[]>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const octokit = createOctokit();
+      const { data } = await octokit.repos.listLanguages({ owner, repo });
+
+      const mapped = Object.keys(data)
+        .map((lang) => mapGitHubLanguage(lang))
+        .filter((l, i, arr) => arr.indexOf(l) === i) // dedupe
+        .filter((l) => l !== 'other');
+
+      const result = mapped.length ? mapped : ['other' as SupportedLanguage];
+      setCache(cacheKey, result);
+      return result;
+    } catch {
+      return ['other'];
+    }
+  },
+
+  /**
+   * Fetch the README content for a repo (raw text, first ~maxChars characters).
+   * Returns `null` if no README exists.
+   */
+  async getRepoReadme(
+    owner: string,
+    repo: string,
+    maxChars: number = 500,
+  ): Promise<string | null> {
+    const cacheKey = `readme:${owner}/${repo}`;
+    const cached = getCached<string>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const octokit = createOctokit();
+      const { data } = await octokit.repos.getReadme({
+        owner,
+        repo,
+        mediaType: { format: 'raw' },
+      });
+
+      // data is a string when mediaType format is 'raw'
+      const raw = typeof data === 'string' ? data : String(data);
+      if (!raw) return null;
+
+      // Strip common markdown noise: badges, images, HTML tags, heading markers
+      const cleaned = raw
+        .replace(/!\[.*?\]\(.*?\)/g, '')       // images / badges
+        .replace(/\[!\[.*?\]\(.*?\)\]\(.*?\)/g, '') // badge links
+        .replace(/<[^>]+>/g, '')                // HTML tags
+        .replace(/^#{1,6}\s+/gm, '')            // heading markers
+        .replace(/\n{3,}/g, '\n\n')             // excessive blank lines
+        .trim();
+
+      // Take first maxChars, cut at last word boundary
+      let excerpt = cleaned.slice(0, maxChars);
+      if (cleaned.length > maxChars) {
+        const lastSpace = excerpt.lastIndexOf(' ');
+        if (lastSpace > maxChars * 0.6) excerpt = excerpt.slice(0, lastSpace);
+        excerpt += '…';
+      }
+
+      setCache(cacheKey, excerpt);
+      return excerpt;
+    } catch {
+      // 404 = no README, other errors are fine to swallow too
+      return null;
+    }
   },
 
   /** Get the rate-limit status. */

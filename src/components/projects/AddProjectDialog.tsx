@@ -9,11 +9,14 @@ import { InputNumber } from 'primereact/inputnumber';
 import { Message } from 'primereact/message';
 import { MultiSelect } from 'primereact/multiselect';
 import { Slider } from 'primereact/slider';
-import { Dispatch, FC, SetStateAction, useEffect } from 'react';
+import { Dispatch, FC, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import { useAuthContext } from '../../contexts/AuthContext';
 import { useStoreContext } from '../../contexts';
 import {
   SUPPORTED_LANGUAGES,
+  SupportedLanguage,
   PROJECT_CATEGORIES,
   PROJECT_STATUSES,
 } from '../../types/project';
@@ -21,6 +24,8 @@ import {
   projectValidationSchema,
   ProjectValidationData,
 } from '../../validation/schemas';
+import { githubService, UserRepo } from '../../services/github.service';
+import { GitHubRepoSelector } from './GitHubRepoSelector';
 
 interface AddProjectDialogProps {
   visible: boolean;
@@ -61,6 +66,11 @@ export const AddProjectDialog: FC<AddProjectDialogProps> = ({
   setVisible,
 }) => {
   const { addProject } = useStoreContext();
+  const { user } = useAuthContext();
+  const [showRepoSelector, setShowRepoSelector] = useState(false);
+
+  /** Extract GitHub username from the user's profile. */
+  const githubUsername = user?.username ?? '';
 
   const {
     register,
@@ -82,6 +92,73 @@ export const AddProjectDialog: FC<AddProjectDialogProps> = ({
       maintainerCount: 1,
     },
   });
+
+  /**
+   * When a repo is selected from the GitHub picker, auto-fill form fields.
+   * Also fetches the full language breakdown from the GitHub API.
+   */
+  const handleRepoSelect = useCallback(
+    async (repo: UserRepo) => {
+      // Basic fields
+      setValue('name', repo.name);
+      setValue('githubRepository', repo.htmlUrl);
+      if (repo.homepage) setValue('homePage', repo.homepage);
+      // Fetch README for a richer description
+      const parsed = githubService.parseRepoUrl(repo.htmlUrl);
+      if (parsed) {
+        const readme = await githubService.getRepoReadme(parsed.owner, parsed.repo, 500);
+        if (readme) {
+          // Convert newlines to <br> / <p> for the rich-text Editor
+          const htmlDesc = readme
+            .split(/\n\n+/)
+            .map((p) => `<p>${p.replace(/\n/g, '<br>')}</p>`)
+            .join('');
+          setValue('description', htmlDesc);
+        } else if (repo.description) {
+          setValue('description', repo.description);
+        }
+      } else if (repo.description) {
+        setValue('description', repo.description);
+      }
+
+      // License mapping
+      const licenseMap: Record<string, string> = {
+        'MIT': 'MIT',
+        'Apache-2.0': 'Apache-2.0',
+        'GPL-3.0-only': 'GPL-3.0',
+        'GPL-3.0-or-later': 'GPL-3.0',
+        'GPL-3.0': 'GPL-3.0',
+        'BSD-3-Clause': 'BSD-3-Clause',
+        'ISC': 'ISC',
+        'MPL-2.0': 'MPL-2.0',
+        'Unlicense': 'Unlicense',
+        '0BSD': 'Unlicense',
+      };
+      const mappedLicense = repo.license ? (licenseMap[repo.license] ?? 'Other') : 'MIT';
+      setValue('license', mappedLicense);
+
+      // Contributing guide (conventional location)
+      setValue(
+        'contributingGuideUrl',
+        `${repo.htmlUrl}/blob/main/CONTRIBUTING.md`,
+      );
+
+      // Fetch detailed languages from GitHub's Languages API
+      if (parsed) {
+        const langs = await githubService.getRepoLanguages(parsed.owner, parsed.repo);
+        setValue('languages', langs as SupportedLanguage[]);
+      } else {
+        setValue('languages', repo.languages as SupportedLanguage[]);
+      }
+
+      // Trigger validation on all filled fields
+      await trigger();
+
+      setShowRepoSelector(false);
+      toast.success(`Imported "${repo.name}" — review the details below.`);
+    },
+    [setValue, trigger],
+  );
 
   const handleFormSubmit = async () => {
     try {
@@ -156,6 +233,34 @@ export const AddProjectDialog: FC<AddProjectDialogProps> = ({
         className="flex flex-col gap-4"
         onSubmit={handleSubmit(handleFormSubmit)}
       >
+        {/* GitHub Import Section */}
+        {githubUsername && !showRepoSelector && (
+          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+            <i className="pi pi-github text-xl text-gray-600 shrink-0" />
+            <span className="text-sm text-gray-600 flex-1 whitespace-nowrap">
+              Save time — import from your GitHub repos
+            </span>
+            <Button
+              label="Import from GitHub"
+              icon="pi pi-download"
+              severity="info"
+              size="small"
+              outlined
+              className="!w-auto shrink-0"
+              onClick={() => setShowRepoSelector(true)}
+              type="button"
+            />
+          </div>
+        )}
+
+        {showRepoSelector && githubUsername && (
+          <GitHubRepoSelector
+            username={githubUsername}
+            onSelect={handleRepoSelect}
+            onClose={() => setShowRepoSelector(false)}
+          />
+        )}
+
         {/* Name */}
         <div className="flex flex-col gap-1">
           <label htmlFor="name" className="font-semibold text-sm">

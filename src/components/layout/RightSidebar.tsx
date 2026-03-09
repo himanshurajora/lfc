@@ -113,12 +113,7 @@ export const RightSidebar: FC<RightSidebarProps> = ({ mobile = false }) => {
           />
         </div>
         <Divider />
-        <a
-          className="break-words text-sm"
-          href="mailto:contact@himanshujangid.com"
-        >
-          contact@himanshujangid.com
-        </a>
+        <p className="m-0 text-gray-500">Contact us for ad placement</p>
       </Card>
     </aside>
   );
