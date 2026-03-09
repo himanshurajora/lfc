@@ -25,6 +25,26 @@ import { FilterOptions, OrderByOptions, FilterByOptions } from '../types/filters
 const PROJECTS_COLLECTION = 'projects';
 const PAGE_SIZE = 10;
 
+/** Cache for banned user IDs (refreshed every 2 minutes). */
+let bannedUidsCache: { ids: Set<string>; timestamp: number } | null = null;
+const BANNED_CACHE_TTL = 2 * 60 * 1000;
+
+/** Fetch banned user IDs (cached). */
+async function getBannedUserIds(): Promise<Set<string>> {
+  if (bannedUidsCache && Date.now() - bannedUidsCache.timestamp < BANNED_CACHE_TTL) {
+    return bannedUidsCache.ids;
+  }
+  try {
+    const q = query(collection(db, 'users'), where('banned', '==', true));
+    const snapshot = await getDocs(q);
+    const ids = new Set(snapshot.docs.map((d) => d.id));
+    bannedUidsCache = { ids, timestamp: Date.now() };
+    return ids;
+  } catch {
+    return bannedUidsCache?.ids ?? new Set();
+  }
+}
+
 /** Generate lowercase search tokens from a string for partial matching. */
 function generateSearchTokens(text: string): string[] {
   const words = text.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/);
@@ -190,6 +210,12 @@ export const projectService = {
       (d) => ({ id: d.id, ...d.data() }) as Project,
     );
 
+    // Filter out projects from banned users
+    const bannedIds = await getBannedUserIds();
+    if (bannedIds.size > 0) {
+      projects = projects.filter((p) => !bannedIds.has(p.authorId));
+    }
+
     // Client-side OTHERS filter (avoids multi-field inequality in Firestore)
     if (filters.filterOption === FilterByOptions.OTHERS && currentUserId) {
       projects = projects.filter((p) => p.authorId !== currentUserId);
@@ -245,10 +271,15 @@ export const projectService = {
       limit(PAGE_SIZE),
     );
 
-    return onSnapshot(q, (snapshot) => {
-      const projects = snapshot.docs.map(
+    return onSnapshot(q, async (snapshot) => {
+      let projects = snapshot.docs.map(
         (d) => ({ id: d.id, ...d.data() }) as Project,
       );
+      // Filter out projects from banned users
+      const bannedIds = await getBannedUserIds();
+      if (bannedIds.size > 0) {
+        projects = projects.filter((p) => !bannedIds.has(p.authorId));
+      }
       callback(projects);
     });
   },
@@ -306,6 +337,12 @@ export const projectService = {
     let projects = snapshot.docs
       .map((d) => ({ id: d.id, ...d.data() }) as Project)
       .filter((p) => p.authorId !== currentUserId); // Client-side exclusion
+
+    // Filter out projects from banned users
+    const bannedIds = await getBannedUserIds();
+    if (bannedIds.size > 0) {
+      projects = projects.filter((p) => !bannedIds.has(p.authorId));
+    }
 
     // Score projects by language overlap
     if (skills.length > 0) {

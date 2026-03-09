@@ -15,6 +15,7 @@ import { ProjectDetail } from './components/projects/ProjectDetail';
 import { ProfilePage } from './components/profile/ProfilePage';
 import { BookmarksPage } from './components/bookmarks/BookmarksPage';
 import { AnalyticsDashboard } from './components/analytics/AnalyticsDashboard';
+import { AdminPage } from './components/admin/AdminPage';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { LoadingSpinner } from './components/common/LoadingSpinner';
 
@@ -49,6 +50,7 @@ function App() {
             />
             <Route path="/profile/:userId" element={<ProfilePage />} />
             <Route path="/bookmarks" element={<BookmarksPage />} />
+            <Route path="/admin-lfc" element={<AdminPage />} />
           </Routes>
 
           <ConfirmDialog />

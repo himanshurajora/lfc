@@ -433,6 +433,7 @@ export const AddProjectDialog: FC<AddProjectDialogProps> = ({
           <label className="font-semibold text-sm">Description *</label>
           <Editor
             className="h-48"
+            value={description ?? ''}
             placeholder="Describe your project, what contributors would work on, and why they should join..."
             onTextChange={(e) => {
               if (e.htmlValue) {

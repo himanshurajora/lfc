@@ -17,6 +17,8 @@ export interface UserProfile {
   experienceLevel: 'beginner' | 'intermediate' | 'advanced' | 'expert';
   projectsCreated: number;
   contributionsCount: number;
+  /** Whether the user is banned by an admin. */
+  banned?: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }

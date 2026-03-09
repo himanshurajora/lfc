@@ -11,6 +11,15 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    function isAdminUser() {
+      return isSignedIn() && request.auth.uid == 'PRkC3J55wLaTBlMy8tyyoSqBcJj1';
+    }
+
+    function isNotBanned() {
+      return !exists(/databases/$(database)/documents/users/$(request.auth.uid)) ||
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('banned', false) == false;
+    }
+
     function isProjectAuthor(projectId) {
       return get(/databases/$(database)/documents/projects/$(projectId)).data.authorId == request.auth.uid;
     }
@@ -19,7 +28,7 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if true;
       allow create: if isOwner(userId);
-      allow update: if isOwner(userId);
+      allow update: if isOwner(userId) || isAdminUser();
       allow delete: if false;
 
       // Private profile data (email, etc.) — only the owner can read/write
@@ -48,11 +57,11 @@ service cloud.firestore {
     // ── Projects ─────────────────────────────────────────────────
     match /projects/{projectId} {
       allow read: if true;
-      allow create: if isSignedIn();
+      allow create: if isSignedIn() && isNotBanned();
 
       // Author can update anything.
       // Any authenticated user can increment counter fields only.
-      allow update: if isSignedIn() && (
+      allow update: if isSignedIn() && isNotBanned() && (
         resource.data.authorId == request.auth.uid ||
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(
           ['interestCount', 'commentCount', 'bookmarkCount', 'viewCount']
@@ -63,9 +72,9 @@ service cloud.firestore {
       // Interests sub-collection
       match /interests/{interestId} {
         allow read: if true;
-        allow create: if isSignedIn();
+        allow create: if isSignedIn() && isNotBanned();
         // Interest creator or project owner can update (accept/reject/withdraw)
-        allow update: if isSignedIn() && (
+        allow update: if isSignedIn() && isNotBanned() && (
           resource.data.userId == request.auth.uid ||
           isProjectAuthor(projectId)
         );
@@ -87,7 +96,7 @@ service cloud.firestore {
       // Comments sub-collection
       match /comments/{commentId} {
         allow read: if true;
-        allow create: if isSignedIn();
+        allow create: if isSignedIn() && isNotBanned();
         allow update: if isSignedIn() && resource.data.authorId == request.auth.uid;
         // Comment author or project owner can delete
         allow delete: if isSignedIn() && (

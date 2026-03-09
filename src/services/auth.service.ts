@@ -37,6 +37,13 @@ export const authService = {
         .reloadUserInfo?.screenName ?? user.displayName ?? '';
 
     const profile = await this.getOrCreateProfile(user, githubUsername, credential?.accessToken);
+
+    // Check if user is banned
+    if (profile.banned) {
+      await signOut(auth);
+      throw new Error('BANNED');
+    }
+
     return profile;
   },
 

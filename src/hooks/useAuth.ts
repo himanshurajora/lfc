@@ -18,7 +18,14 @@ export function useAuth() {
       if (fbUser) {
         try {
           const profile = await authService.getProfile(fbUser.uid);
-          setUser(profile);
+          if (profile?.banned) {
+            // Force logout banned users
+            await authService.logout();
+            setUser(null);
+            setFirebaseUser(null);
+          } else {
+            setUser(profile);
+          }
         } catch (error) {
           console.error('Failed to load user profile:', error);
           setUser(null);
@@ -40,7 +47,11 @@ export function useAuth() {
       toast.success(`Welcome, ${profile.displayName || profile.username}!`);
     } catch (error) {
       console.error('Login failed:', error);
-      toast.error('Login failed. Please try again.');
+      if (error instanceof Error && error.message === 'BANNED') {
+        toast.error('Your account has been banned. Contact the administrator.');
+      } else {
+        toast.error('Login failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
